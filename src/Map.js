@@ -13,7 +13,8 @@ class Map extends Component {
   }
 
   closeModal(){
-    window.location.assign('/setting');      
+    this.setState({isOpenModal: false})
+    window.location.assign('/setting')
   }
 
   updateKmzUrl(kmzUrl, map){
