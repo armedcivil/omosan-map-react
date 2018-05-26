@@ -1,0 +1,3 @@
+html, body, #root, #root>div.App {
+  height: 100%
+}
