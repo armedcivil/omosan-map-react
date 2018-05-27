@@ -62,7 +62,6 @@ class Map extends Component {
 
     window.google.maps.event.addListener(layer, 'status_changed', ()=>{
       const status = layer.getStatus();
-      console.log("status : " + status);
       if(!status.match('OK')){
         this.setState({isOpenModal: true})
       }
