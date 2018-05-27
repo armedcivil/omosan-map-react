@@ -14,15 +14,15 @@ class Navigation extends Component {
   }
 
   render () {
-    var link;
+    var navigation;
     if (window.location.pathname.match('^/$')) {
-      link = (<Link to="/setting">設定</Link>)
+      navigation = (<Link to="/setting" style={{float: 'right', marginRight: '20px'}}>設定</Link>)
     } else {
-      link = (<a onClick={this.back}>戻る</a>)
+      navigation = (<Link to='#' onClick={this.back} style={{float: 'left', marginLeft: '20px'}}>戻る</Link>)
     }
     return (
       <div className="Navigation">
-        {link}
+        {navigation}
       </div>
     )
   }

@@ -18,7 +18,7 @@ class Setting extends Component {
     const kmzUrl = this.state.kmzUrl
     return (
       <form className="Screen">
-        <input value={kmzUrl} onChange={this.handleChange}/>
+        <input value={kmzUrl} onChange={this.handleChange} style={{fontSize: '1.2em', marginTop: '80px', marginLeft: '10px', width: '80%'}}/>
       </form>
     )
   }
