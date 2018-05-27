@@ -12,6 +12,7 @@ class App extends Component {
         <div className="App">
           <Navigation/>
           <Route exact path='/' component={Map}/>
+          <Route path='/index.html' component={Map}/>
           <Route path='/setting' component={Setting}/>
         </div>
       </BrowserRouter>
