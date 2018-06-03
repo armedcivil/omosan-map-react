@@ -15,7 +15,7 @@ class Navigation extends Component {
 
   render () {
     var navigation;
-    if (window.location.pathname.match('^/(index\.html){0,1}$')) {
+    if (window.location.pathname.match('^/(index.html){0,1}$')) {
       navigation = (<Link to="/setting" style={{float: 'right', marginRight: '20px'}}>設定</Link>)
     } else {
       navigation = (<a onClick={this.back} style={{float: 'left', marginLeft: '20px'}}>戻る</a>)

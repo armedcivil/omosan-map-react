@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
+import KMLJson from './utils/KMLJson'
 import './Screen.css'
 import './Map.css'
+
+var Unzip = require('../node_modules/zlibjs/bin/unzip.min').Zlib.Unzip
 
 const modalStyle = {
   content:{
@@ -39,9 +42,8 @@ class Map extends Component {
 
   constructor (props) {
     super(props)
-    this.updateKmzUrl = this.updateKmzUrl.bind(this)
     this.closeModal = this.closeModal.bind(this)
-    this.state = {}
+    this.state = {map: null, kmlJson: null, markers: [], infoWindows: [], unzip: null}
   }
 
   closeModal(){
@@ -49,23 +51,111 @@ class Map extends Component {
     window.location.assign('/setting')
   }
 
-  updateKmzUrl(kmzUrl, map){
-    if (!kmzUrl) {
-      // 引数が null の場合、KMLLayer でエラー検知のため適当な URL を設定
-      kmzUrl = 'https://hogehoge.jp/kmz'
+  requestKmz(url, end){
+    console.log(url)
+    if(url === null || url === undefined || typeof(url) !== "string") {
+      end(null);
+      return;
     }
-    console.log(kmzUrl);
-    var layer = new window.google.maps.KmlLayer({
-      url: kmzUrl,
-      map: map
-    })
+    var self = this;
+    self.end = end;
+    fetch(url.replace("/d/u/0/","/d/"), {redirect: "manual"}).then(res => {
+      var reader = res.body.getReader()
+      var result = [];
+      function push(){
+        reader.read().then(({done, value}) => {
+          if(done){
+            var sumLength = 0;
+            for(var i = 0; i < result.length; i++){
+              sumLength += result[i].byteLength
+            }
+            
+            var whole = new Uint8Array(sumLength)
+            var pos = 0
+            for(var b = 0; b < result.length; b++){
+              whole.set(result[b], pos)
+              pos += result[b].byteLength
+            }
 
-    window.google.maps.event.addListener(layer, 'status_changed', ()=>{
-      const status = layer.getStatus();
-      if(!status.match('OK')){
-        this.setState({isOpenModal: true})
+            end(whole)
+            return
+          }
+          result.push(value)
+          push()
+        })
       }
-    });
+      push()
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
+
+  updateKmzUrl(kmzUrl){
+
+    this.requestKmz(kmzUrl, (bufferArray) => {
+      if (!bufferArray) {
+        this.setState({isOpenModal: true})
+        return;
+      }
+      localStorage.setItem("zip_data", String.fromCharCode.apply("", bufferArray))
+      this.updateMap(this.state.map)
+    })
+  }
+
+  updateMap(map){
+    if(!localStorage.getItem("zip_data")){
+      this.setState({isOpenModal: true})
+      return;
+    }
+    var unzip = new Unzip((new Uint8Array([].map.call(localStorage.getItem("zip_data"), (c) => {
+      return c.charCodeAt(0)
+    }))))
+    var fileNames = unzip.getFilenames();
+    var kmlDoc = (new TextDecoder("utf-8")).decode(unzip.decompress("doc.kml"));
+    var kmlJson = new KMLJson(kmlDoc)
+    this.setState({kmlJson: kmlJson})
+    this.setState({unzip: unzip})
+    for(var i = 0; i < kmlJson.folders.length; i++){
+      var folder = kmlJson.folders[i]
+      for(var n = 0; n < folder.placemarks.length; n++){
+        var placemark = folder.placemarks[n]
+        var detectedStyle = kmlJson.findStyle(placemark)
+        var iconUrl = undefined;
+        var marker = new window.google.maps.Marker({
+          position: new window.google.maps.LatLng(placemark.point.y, placemark.point.x),
+          title: placemark.name,
+          map: map
+        })
+        this.state.markers.push(marker)
+        if(detectedStyle.icon.href && !detectedStyle.icon.href.startsWith("http")){
+          var splitStrings = detectedStyle.icon.href.split('.')
+          var extension = splitStrings[splitStrings.length - 1];
+          iconUrl = "data:image/" + extension + ";base64," + (new Buffer(unzip.decompress(detectedStyle.icon.href))).toString("base64")
+          marker.setIcon({url: iconUrl, scaledSize: new window.google.maps.Size(32, 32, "px", "px")})
+        }
+        var description = placemark.description
+        var name = placemark.name
+        if(detectedStyle.balloon.text && detectedStyle.balloon.text.match(/\$\[name\]/)){
+          name = detectedStyle.balloon.text.replace("$[name]", placemark.name)
+        }
+        var content = name + (description == null ? "" : ("<br>" + description))
+        var infoWindow = new window.google.maps.InfoWindow({
+          content: content,
+          position: new window.google.maps.LatLng(placemark.point.y, placemark.point.x),
+          maxWidth: 350
+        })
+        this.state.infoWindows.push(infoWindow)
+      }
+    }
+    var infoWindows = this.state.infoWindows
+    this.state.markers.forEach((marker, index) => {
+      var infoWindow = infoWindows[index]
+      marker.addListener("click", () => {
+        infoWindow.open(map)
+      })
+      this.state.infoWindows
+    })
   }
 
   componentDidMount() {
@@ -76,7 +166,12 @@ class Map extends Component {
         zoom: 15
       }
     )
-    this.updateKmzUrl(localStorage.getItem('kmz_url'), map)
+    this.setState({map: map})
+    if(navigator.onLine){
+      this.updateKmzUrl(localStorage.getItem('kmz_url'), map)
+    } else {
+      this.updateMap(map)
+    }
   }
 
   render(){
