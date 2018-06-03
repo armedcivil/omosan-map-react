@@ -4,6 +4,7 @@ import './App.css';
 import Navigation from './Navigation';
 import Map from './Map';
 import Setting from './Setting';
+import Search from './Search';
 
 class App extends Component {
   render() {
@@ -11,6 +12,8 @@ class App extends Component {
       <BrowserRouter>
         <div className="App">
           <Navigation/>
+          {/* TODO : Search は検索・絞り込み選択させる時のみ表示 */}
+          <Search />
           <Route exact path='/' component={Map}/>
           <Route path='/index.html' component={Map}/>
           <Route path='/setting' component={Setting}/>
