@@ -19,7 +19,7 @@ class App extends Component {
         <div className="App">
           <Navigation onSeachClick={(isSearchOpen)=>{this.setState({isSearchOpen: isSearchOpen})}}/>
           <Route exact path='/' render={props => <Map isSearchOpen={this.state.isSearchOpen} onSearchClose={()=>{this.setState({isSearchOpen: false})}}/>}/>
-          <Route path='/index.html' component={Map}/>
+          <Route path='/index.html' render={props => <Map isSearchOpen={this.state.isSearchOpen} onSearchClose={()=>{this.setState({isSearchOpen: false})}}/>}/>
           <Route path='/setting' component={Setting}/>
         </div>
       </BrowserRouter>
