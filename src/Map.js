@@ -108,7 +108,11 @@ class Map extends Component {
         this.setState({isOpenModal: true})
         return;
       }
-      localStorage.setItem("zip_data", String.fromCharCode.apply("", bufferArray))
+      var myString = "";
+      for (var i=0; i<bufferArray.byteLength; i++) {
+        myString += String.fromCharCode(bufferArray[i])
+      }
+      localStorage.setItem("zip_data", myString)
       this.updateMap(this.state.map)
     })
   }
