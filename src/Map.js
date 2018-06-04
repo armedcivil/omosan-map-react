@@ -4,6 +4,7 @@ import Modal from 'react-modal';
 import KMLJson from './utils/KMLJson'
 import './Screen.css'
 import './Map.css'
+import Search from './Search';
 
 var Unzip = require('../node_modules/zlibjs/bin/unzip.min').Zlib.Unzip
 
@@ -43,7 +44,15 @@ class Map extends Component {
   constructor (props) {
     super(props)
     this.closeModal = this.closeModal.bind(this)
-    this.state = {map: null, kmlJson: null, markers: [], infoWindows: [], unzip: null}
+    this.state = {
+      map: null, 
+      kmlJson: null, 
+      markers: [], 
+      infoWindows: [], 
+      unzip: null, 
+      searchNames: [],
+      isOpenSearch: false,
+    }
   }
 
   closeModal(){
@@ -52,14 +61,14 @@ class Map extends Component {
   }
 
   requestKmz(url, end){
-    console.log(url)
     if(url === null || url === undefined || typeof(url) !== "string") {
       end(null);
       return;
     }
     var self = this;
     self.end = end;
-    fetch(url.replace("/d/u/0/","/d/"), {redirect: "manual"}).then(res => {
+    var newUrl = url.replace(/\/d\/u\/\d{1,}\//,"/d/")
+    fetch(newUrl, {redirect: "manual"}).then(res => {
       var reader = res.body.getReader()
       var result = [];
       function push(){
@@ -103,7 +112,11 @@ class Map extends Component {
     })
   }
 
-  updateMap(map){
+  updateMap(map, searchNames){
+    this.state.markers.forEach((marker) => {marker.setMap(null)})
+    this.state.infoWindows.forEach((info) => {info.setMap(null)})
+    this.state.markers.splice(0, this.state.markers.length)
+    this.state.infoWindows.splice(0, this.state.infoWindows.length)
     if(!localStorage.getItem("zip_data")){
       this.setState({isOpenModal: true})
       return;
@@ -118,6 +131,9 @@ class Map extends Component {
     this.setState({unzip: unzip})
     for(var i = 0; i < kmlJson.folders.length; i++){
       var folder = kmlJson.folders[i]
+      if(searchNames && searchNames.indexOf(folder.name) === -1){
+        continue;
+      }
       for(var n = 0; n < folder.placemarks.length; n++){
         var placemark = folder.placemarks[n]
         var detectedStyle = kmlJson.findStyle(placemark)
@@ -176,8 +192,18 @@ class Map extends Component {
 
   render(){
     const isOpenModal = this.state.isOpenModal;
+    const map = this.state.map;
+    var folderNames = [];
+    if(this.state.kmlJson){
+      folderNames = this.state.kmlJson.folders.map((value) => {return value.name})
+    }
+    var searchWindow = null
+    if(this.props.isSearchOpen){
+      searchWindow = (<Search ref="search" folders={folderNames} onSeachListChange={(searchNames)=>{this.updateMap(map, searchNames)}}/>)
+    }
     return (
       <div className="Map">
+        {searchWindow}
         <div ref="map" className="mapComponent"/>
         <Modal 
           isOpen={isOpenModal} 

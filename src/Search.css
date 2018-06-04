@@ -2,8 +2,8 @@
   width : 45%;
   height : 20%;
   position: absolute;
-  z-index: 2;
-  background-color: #ff0000;
+  z-index: 10;
+  background-color: rgba(200, 200, 200, 0.95);
   top: 35px;
   left: 10px;
   border-bottom-left-radius: 10px;
@@ -12,6 +12,7 @@
   border-top-left-radius: 10px;
   padding-top: 35px;
   padding-bottom: 35px;
+  box-shadow: 0 2px 20px 2px rgba(100, 100, 100, 0.5);
 }
 
 .Search:after{
@@ -24,6 +25,31 @@
   height: 0px;
   margin-left: 10px;
   border-style: solid;
-  border-color: transparent transparent #ff0000 transparent;
+  border-color: transparent transparent rgba(200, 200, 200, 0.95) transparent;
   border-width: 0 10px 10px 10px;
+}
+
+.Search input {
+  display: none;
+}
+
+.Search input:checked + div.right {
+  fill: #4088dd;
+}
+
+.Search div.right {
+  float: right;
+  height: 30px;
+  width: 30px;
+  margin-right: 5px;
+  vertical-align: middle;
+  fill: transparent;
+}
+
+.Search div.listItem {
+  width: 100px;
+  height: 30px;
+  border: solid;
+  border-width: 0 0 0.5px 0;
+  border-bottom-color: grey;
 }

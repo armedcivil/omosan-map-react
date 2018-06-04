@@ -7,14 +7,18 @@ import Setting from './Setting';
 import Search from './Search';
 
 class App extends Component {
+
+  constructor(props){
+    super(props)
+    this.state = {isSearchOpen: false}
+  }
+
   render() {
     return (
       <BrowserRouter>
         <div className="App">
-          <Navigation/>
-          {/* TODO : Search は検索・絞り込み選択させる時のみ表示 */}
-          <Search />
-          <Route exact path='/' component={Map}/>
+          <Navigation onSeachClick={(isSearchOpen)=>{this.setState({isSearchOpen: isSearchOpen})}}/>
+          <Route exact path='/' render={props => <Map isSearchOpen={this.state.isSearchOpen}/>}/>
           <Route path='/index.html' component={Map}/>
           <Route path='/setting' component={Setting}/>
         </div>
