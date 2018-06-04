@@ -193,6 +193,37 @@ class Map extends Component {
     } else {
       this.updateMap(map)
     }
+    if(navigator.geolocation){
+      var markerHeading = new window.google.maps.Marker({map:map})
+      var markerCircle = new window.google.maps.Marker({map:map})
+      navigator.geolocation.watchPosition(
+        (position)=>{
+          var latLng = new window.google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+          markerCircle.setPosition(latLng)
+          markerHeading.setPosition(latLng)
+          markerCircle.setIcon({
+            path: "M16.5,31.5 C8.768,31.5 2.5,25.232 2.5,17.5 C2.5,9.768 8.768,3.5 16.5,3.5 C24.232,3.5 30.5,9.768 30.5,17.5 C30.5,25.232 24.232,31.5 16.5,31.5 z", 
+            rotation: position.coords.heading, 
+            scaledSize: new window.google.maps.Size(32, 32),
+            strokeColor: "white",
+            strokeWidth: 12,
+            fillOpacity: 1,
+            fillColor: "#2995FF",
+            anchor: new window.google.maps.Point(16, 16)
+          })
+          markerHeading.setIcon({
+            path: "M10,5.408 L13,2.704 L16,0 L19,2.704 L22,5.408 L16,5.408 z", 
+            rotation: position.coords.heading, 
+            scaledSize: new window.google.maps.Size(32, 32),
+            strokeColor: "transparent",
+            fillOpacity: 1,
+            fillColor: "#2995FF",
+            anchor: new window.google.maps.Point(16, 16)
+          })
+        },
+        (error)=>{alert(error.message)},
+      {enableHighAccuracy: true})
+    }
   }
 
   render(){
