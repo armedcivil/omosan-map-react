@@ -204,7 +204,13 @@ class Map extends Component {
     }
     var searchWindow = null
     if(this.props.isSearchOpen){
-      searchWindow = (<Search ref="search" folders={folderNames} searchNames={this.state.searchNames} onSeachListChange={(searchNames)=>{this.updateMap(map, this.state.searchNames)}}/>)
+      searchWindow = (
+      <Search 
+        ref="search" 
+        folders={folderNames} 
+        searchNames={this.state.searchNames} 
+        onSeachListChange={(searchNames)=>{this.updateMap(map, this.state.searchNames)}}
+        onClose={this.props.onSearchClose}/>)
     }
     return (
       <div className="Map">

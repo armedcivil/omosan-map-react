@@ -8,7 +8,6 @@ class Navigation extends Component {
     super(props);
     this.back = this.back.bind(this)
     this.openSeach = this.openSeach.bind(this)
-    this.state = {isSearchOpen: false}
   }
 
   back () {
@@ -16,8 +15,7 @@ class Navigation extends Component {
   }
 
   openSeach(){
-    this.state.isSearchOpen = !this.state.isSearchOpen
-    this.props.onSeachClick(this.state.isSearchOpen)
+    this.props.onSeachClick(!this.props.isSearchOpen)
   }
 
   render () {
