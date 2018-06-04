@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
 import './Search.css';
-/* TODO : 検索、絞り込み条件を選択する機能を持たせる */
 class Search extends Component {
 
   constructor(props){
