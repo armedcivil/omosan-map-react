@@ -51,6 +51,7 @@ class Map extends Component {
       infoWindows: [], 
       unzip: null, 
       searchNames: [],
+      alreadySetSearchNames: false,
       isOpenSearch: false,
     }
   }
@@ -196,10 +197,14 @@ class Map extends Component {
     var folderNames = [];
     if(this.state.kmlJson){
       folderNames = this.state.kmlJson.folders.map((value) => {return value.name})
+      if(!this.state.alreadySetSearchNames){
+        this.state.alreadySetSearchNames = true
+        this.state.searchNames = folderNames
+      }
     }
     var searchWindow = null
     if(this.props.isSearchOpen){
-      searchWindow = (<Search ref="search" folders={folderNames} onSeachListChange={(searchNames)=>{this.updateMap(map, searchNames)}}/>)
+      searchWindow = (<Search ref="search" folders={folderNames} searchNames={this.state.searchNames} onSeachListChange={(searchNames)=>{this.updateMap(map, this.state.searchNames)}}/>)
     }
     return (
       <div className="Map">
