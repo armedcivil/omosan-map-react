@@ -184,7 +184,7 @@ class Map extends Component {
       ReactDOM.findDOMNode(this.refs["map"]),
       {
         center: new window.google.maps.LatLng(35.6665369,139.7083624),
-        zoom: 15
+        zoom: 17
       }
     )
     this.setState({map: map})
