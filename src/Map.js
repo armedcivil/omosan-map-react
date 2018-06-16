@@ -69,42 +69,68 @@ class Map extends Component {
     var self = this;
     self.end = end;
     var newUrl = url.replace(/\/d\/u\/\d{1,}\//,"/d/")
-    fetch(newUrl, {redirect: "manual"}).then(res => {
-      var reader = res.body.getReader()
-      var result = [];
-      function push(){
-        reader.read().then(({done, value}) => {
-          if(done){
-            var sumLength = 0;
-            for(var i = 0; i < result.length; i++){
-              sumLength += result[i].byteLength
-            }
-            
-            var whole = new Uint8Array(sumLength)
-            var pos = 0
-            for(var b = 0; b < result.length; b++){
-              whole.set(result[b], pos)
-              pos += result[b].byteLength
-            }
 
-            end(whole)
-            return
-          }
-          result.push(value)
-          push()
-        })
-      }
-      push()
-    })
-    .catch(err => {
-      console.log(err);
-    })
+    var ua = navigator.userAgent.toLowerCase();
+
+    if (ua.indexOf("firefox") != -1) {
+      fetch(newUrl, {redirect: "manual"}).then(res => {
+        return res.blob();
+      })
+      .then(b => {
+        var fr = new FileReader();
+        fr.onload = data => {
+          self.end(new Uint8Array(fr.result))
+        }
+        fr.readAsArrayBuffer(b)
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    } else {
+      fetch(newUrl, {redirect: "manual"}).then(res => {
+        var reader = res.body.getReader()
+        var result = [];
+        function push(){
+          reader.read().then(({done, value}) => {
+            if(done){
+              self.end(self.concatUint8Array(result))
+              return
+            }
+            result.push(value)
+            push()
+          })
+        }
+        push()
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    }
+
+  }
+
+  concatUint8Array(array){
+    var sumLength = 0;
+    for(var i = 0; i < array.length; i++){
+      sumLength += array[i].byteLength
+    }
+    
+    var whole = new Uint8Array(sumLength)
+    var pos = 0
+    for(var b = 0; b < array.length; b++){
+      whole.set(array[b], pos)
+      pos += array[b].byteLength
+    }
+
+    return whole;
   }
 
   updateKmzUrl(kmzUrl){
 
     this.requestKmz(kmzUrl, (bufferArray) => {
+      console.log(bufferArray)
       if (!bufferArray) {
+        console.log("bufferArray is null")
         this.setState({isOpenModal: true})
         return;
       }
