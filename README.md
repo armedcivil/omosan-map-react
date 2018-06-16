@@ -7,7 +7,7 @@ cd omosan-map-react
 npm install
 mkdir build-production
 cd build-production
-git remote add origin https://github.com/gaprot/gaprot.github.io.git
+git clone https://github.com/gaprot/gaprot.github.io.git .
 ```
 
 ## Development
