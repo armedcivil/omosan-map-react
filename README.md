@@ -21,7 +21,7 @@ access to [http://localhost:3000](http://localhost:3000)
 ## Build & Deploy
 
 ```
-npm build
+yarn build
 cd build-production
 git push origin master
 ```
